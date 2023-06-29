@@ -1,43 +1,29 @@
 <template>
-  <div class="centered-screen">
-    <span class="text-larger">vscode webvue</span>
-    <span class="text-large">vscode extension development template using vue 3 and vite!</span>
-    <button @click="increment">increment {{ counter }}</button>
+  <div id="app">
+    <el-config-provider :locale="zhCn">
+      <router-view />
+    </el-config-provider>
   </div>
 </template>
 
-<script lang="ts">
+<script>
 export default {
-  name: 'App',
-  data: () => ({
-    counter: 0
-  }),
-  methods: {
-    increment() {
-      this.counter += 1
-      vscode.postMessage({
-        message: 'extension can listen to vue events by using postMessage method!'
-      })
-    },
-  }
+  name: 'App'
 }
 </script>
 
-<style>
-.centered-screen {
-  width: 100vw;
+<script setup>
+import zhCn from 'element-plus/lib/locale/lang/zh-cn'
+</script>
+<style lang="scss">
+// 引入初始化样式
+#app {
+  background: #eee;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+  font-weight: 400 !important;
 }
-.text-larger {
-  font-size: x-large;
-  margin-bottom: 1rem;
-}
-.text-large {
-  font-size: large;
-  margin-bottom: 1rem;
+.el-button{
+  font-weight: 400 !important;
 }
 </style>

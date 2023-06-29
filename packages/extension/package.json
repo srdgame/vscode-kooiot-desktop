@@ -1,6 +1,6 @@
 {
-    "name": "@venom-gui/extension",
-    "displayName": "venom-gui-extension",
+    "name": "@kooiot-desktop/extension",
+    "displayName": "KooIoT Desktop",
     "description": "",
     "version": "0.0.1",
     "engines": {
@@ -10,14 +10,18 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:vue-3-vscode-webview.createFlow"
+        "onCommand:kooiot-desktop.open"
     ],
     "main": "./dist/extension.js",
     "contributes": {
         "commands": [
             {
-                "command": "vue-3-vscode-webview.createFlow",
-                "title": "Hello World"
+                "command": "kooiot-desktop.open",
+                "title": "%extension.open.title"
+            },
+            {
+                "command": "kooiot-desktop.start",
+                "title": "%extension.start.title"
             }
         ]
     },
@@ -34,18 +38,22 @@
         "dev": "bash -exec 'code --extensionDevelopmentPath=$(pwd)'"
     },
     "devDependencies": {
-        "@types/vscode": "^1.63.0",
         "@types/glob": "^7.1.4",
         "@types/mocha": "^9.0.0",
         "@types/node": "14.x",
+        "@types/vscode": "^1.63.0",
         "@typescript-eslint/eslint-plugin": "^5.1.0",
         "@typescript-eslint/parser": "^5.1.0",
+        "@vscode/test-electron": "^1.6.2",
         "eslint": "^8.1.0",
         "glob": "^7.1.7",
         "mocha": "^9.1.3",
         "ts-loader": "^9.2.5",
+        "vscode-nls-dev": "^4.0.4",
         "webpack": "^5.52.1",
-        "webpack-cli": "^4.8.0",
-        "@vscode/test-electron": "^1.6.2"
+        "webpack-cli": "^4.8.0"
+    },
+    "dependencies": {
+        "vscode-nls": "^5.2.0"
     }
 }

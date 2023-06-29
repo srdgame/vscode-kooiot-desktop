@@ -1,0 +1,14 @@
+{
+    "i18n-ally.localesPaths": [
+        "src/locales"
+    ],
+    "i18n-ally.keystyle": "nested",
+    "i18n-ally.extract.ignoredByFiles": {
+        "src/view/login/index.vue": [
+            "English"
+        ]
+    },
+    "i18n-ally.sourceLanguage": "zh",
+    "i18n-ally.displayLanguage": "zh",
+    "i18n-ally.indent": 4
+}
