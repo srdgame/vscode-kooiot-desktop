@@ -141,33 +141,6 @@
       </el-table-column> -->
     </el-table>
 
-    <el-dialog v-model="dialogFormVisible" :before-close="handleClose" :title="dialogTitle">
-      <el-form
-        ref="editForm"
-        :inline="true"
-        :model="form"
-        :rules="rules"
-        label-width="120px"
-      >
-        <el-form-item :label="t('iot.appInstName')" prop="inst" style="width:30%">
-          <el-input
-            v-model="form.inst"
-            :disabled="isEdit"
-            autocomplete="off"
-            :placeholder="t('iot.appInstNameTip')"
-            @change="changeInst"
-          />
-        </el-form-item>
-      </el-form>
-      <configUI />
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="closeDialog">{{ t('iot.cancel') }}</el-button>
-          <el-button type="primary" @click="enterDialog"> {{ t('iot.confirm') }}</el-button>
-        </div>
-      </template>
-    </el-dialog>
-
     <el-drawer
       v-model="drawerShow"
       direction="rtl"
@@ -201,17 +174,14 @@ export default {
 import { formatTimeToStr } from '@/utils/date'
 import {
   list_app,
-  install_app,
   uninstall_app,
   upgrade_app,
-  config_app,
   start_app,
   stop_app,
   restart_app,
   option_app,
   rename_app
 } from '@/api/local/device/app'
-import configUI from '@/components/configUI/index.vue'
 import WaitableSwitch from '@/components/waitableSwitch/index.vue'
 import appConfig from './appConfig.vue'
 import { computed, ref, watch } from 'vue'
@@ -254,29 +224,6 @@ const props = defineProps({
 })
 
 const search = ref('')
-const checkFlag = ref(false)
-const dialogFormVisible = ref(false)
-const dialogTitle = ref(t('iot.appInstNameChangeTitle'))
-const form = ref({
-  ID: 0,
-  path: '',
-  name: '',
-  hidden: '',
-  parentId: '',
-  component: '',
-  meta: {
-    title: '',
-    icon: '',
-    defaultMenu: false,
-    closeTab: false,
-    keepAlive: false
-  },
-  parameters: []
-})
-
-const rules = ref({
-  inst: [{ required: true, message: t('iot.appInstNameTip'), trigger: 'blur' }]
-})
 
 const tableData = ref([])
 const allData = computed(() => {
@@ -285,7 +232,6 @@ const allData = computed(() => {
     data.inst.toLowerCase().includes(search.value.toLowerCase())) : []
 })
 
-const isEdit = ref(false)
 const checkTimer = ref(null)
 const drawerTitle = ref(t('iot.modifyAppConfig'))
 const drawerShow = ref(false)
@@ -338,57 +284,6 @@ const openApp = (row) => {
     params: {
       app: row.name,
       title: t('iot.application') + ' - ' + row.name
-    }
-  })
-}
-
-const handleClose = (done) => {
-  initForm()
-  done()
-}
-
-const initForm = () => {
-  checkFlag.value = false
-  editForm.value.resetFields()
-  form.value = {
-    ID: 0,
-    path: '',
-    name: '',
-    hidden: '',
-    parentId: '',
-    component: '',
-    meta: {
-      title: '',
-      icon: '',
-      defaultMenu: false,
-      keepAlive: ''
-    }
-  }
-}
-
-const closeDialog = () => {
-  initForm()
-  dialogFormVisible.value = false
-}
-
-const enterDialog = async() => {
-  editForm.value.validate(async valid => {
-    if (valid) {
-      let res
-      if (isEdit.value) {
-        res = await config_app(form.value)
-      } else {
-        res = await install_app(form.value)
-      }
-      if (res.code === 0) {
-        ElMessage({
-          type: 'success',
-          message: isEdit.value ? t('general.editSuccess') : t('general.addSuccess')
-        })
-        getTableData()
-      }
-      initForm()
-      dialogFormVisible.value = false
     }
   })
 }
@@ -488,15 +383,36 @@ const restartApp = async(row) => {
 
 // 修改应用名称
 const renameApp = async(row) => {
-  const res = await rename_app(row)
-  if (res.code === 0) {
-    actionStore.PushAction({ id: res.data.id, name: t('iot.appUpgradeApp') + ` ${row.inst} - ${props.device.sn}`, data: row })
-    ElMessage({
-      type: 'success',
-      message: t('iot.appUpgradeReqSuccess'),
-      showClose: true
-    })
-  }
+  ElMessageBox.prompt(t('iot.enterAppInstNameTip2'), t('general.hint'), {
+    confirmButtonText: t('general.confirm'),
+    cancelButtonText: t('general.cancel'),
+    inputPattern: /\S/,
+    inputErrorMessage: '不能为空',
+    inputValue: '',
+  }).then(async({ value }) => {
+    if (!value || value.length < 3) {
+      ElMessage({
+        type: 'error',
+        message: t('iot.appInstNameTipError'),
+        showClose: true
+      })
+    } else {
+      const data = {
+        device: props.device.sn,
+        inst: row.inst,
+        new_name: value,
+      }
+      const res = await rename_app(data)
+      if (res.code === 0) {
+        actionStore.PushAction({ id: res.data.id, name: t('iot.renameAppInstName') + ` ${row.inst} - ${props.device.sn}`, data: row })
+        ElMessage({
+          type: 'success',
+          message: t('iot.renameAppInstNameSuccess'),
+          showClose: true
+        })
+      }
+    }
+  })
 }
 
 const upgradeApp = async(row, version) => {

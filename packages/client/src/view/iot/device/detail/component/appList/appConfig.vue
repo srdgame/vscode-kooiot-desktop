@@ -119,7 +119,7 @@ const saveConfig = async() => {
   const data = {
     device: props.device.sn,
     inst: props.instInfo.inst,
-    option: jsonData.value
+    conf: jsonData.value
   }
   const res = await config_app(data)
   if (res.code === 0) {
