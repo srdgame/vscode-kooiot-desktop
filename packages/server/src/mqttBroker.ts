@@ -61,11 +61,18 @@ export class MQTTBroker {
         });
         this._broker = aedes;
     }
-    public publish(topic: string, payload: string) {
+    public publish(topic: string, payload: string, retain: boolean, qos: 0 | 1 | 2) {
         if (this._broker === undefined) {
             return false;
         }
-        this._broker.publish({ topic: topic, payload: payload }, (error) => {
+        this._broker.publish({
+            topic: topic,
+            payload: payload,
+            retain: retain,
+            cmd: 'publish',
+            qos: qos,
+            dup: false
+        }, (error) => {
             console.log(error);
         });
     }

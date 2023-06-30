@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-loading.fullscreen.lock="loading">
     <div class="gva-search-box">
       <el-form ref="searchForm" :inline="true" :model="searchInfo">
         <el-form-item :label="t('iot.name')">
@@ -34,35 +34,36 @@
 
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" :title="dialogTitle">
       <el-form ref="dataForm" :inline="true" :model="formData" :rules="rules" label-width="120px">
-        <el-form-item :label="t('iot.serialNumber')" prop="sn">
-          <el-input v-model.trim="formData.sn" autocomplete="off" />
-        </el-form-item>
         <el-form-item :label="t('iot.name')" prop="name">
           <el-input v-model.trim="formData.name" autocomplete="off" />
         </el-form-item>
         <el-form-item :label="t('general.description')" prop="desc">
           <el-input v-model.trim="formData.desc" autocomplete="off" />
         </el-form-item>
-        <el-form-item :label="t('iot.address')" prop="desc">
+        <el-form-item :label="t('iot.address')" prop="host">
           <el-input v-model.trim="formData.host" autocomplete="off" />
         </el-form-item>
-        <el-form-item :label="t('iot.port')" prop="desc">
+        <el-form-item :label="t('iot.port')" prop="port">
           <el-input v-model.number="formData.port" autocomplete="off" />
         </el-form-item>
-        <el-form-item :label="t('iot.user')" prop="desc">
+        <el-form-item :label="t('iot.user')" prop="user">
           <el-input v-model.trim="formData.user" autocomplete="off" />
         </el-form-item>
-        <el-form-item :label="t('iot.password')" prop="desc">
+        <el-form-item :label="t('iot.password')" prop="password">
           <el-input v-model.trim="formData.password" autocomplete="off" />
         </el-form-item>
-        <el-form-item :label="t('iot.enableCloudAuth')" prop="enable">
+        <el-form-item :label="t('iot.enableCloudAuth')" prop="cloudAuth">
           <el-switch v-model="formData.cloudAuth" />
+        </el-form-item>
+        <el-form-item :label="t('iot.serialNumber')" prop="sn" style="width: 100%">
+          <el-input :disabled="type==='edit'" v-model.trim="formData.sn" autocomplete="off" />
+          <el-button v-if="type==='add'" plain type="primary" style="margin-left: 5px" @click="fetchSN()">{{ t('iot.fetchDeviceSN') }}</el-button>
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button v-if="formData.online" type="danger" @click="switchToCloud(true)">{{ t('iot.switchToCloud') }}</el-button>
-          <el-button v-else type="primary" @click="switchToCloud(false)">{{ t('iot.switchToLocal') }}</el-button>
+          <el-button v-if="formData.online" :disabled="!hasValidDevice" plain type="danger" @click="switchToCloud(true)">{{ t('iot.switchToCloud') }}</el-button>
+          <el-button v-else :disabled="!hasValidDevice" plain type="danger" @click="switchToCloud(false)">{{ t('iot.switchToLocal') }}</el-button>
           <el-button @click="closeDialog">{{ t('iot.cancel') }}</el-button>
           <el-button type="primary" @click="enterDialog"> {{ t('iot.confirm') }}</el-button>
         </div>
@@ -87,12 +88,14 @@ import {
 } from '@/api/local/device'
 import {
   switch_cloud,
+  fetch_device_info,
 } from '@/api/local/device/sys'
 import { formatTimeToStr } from '@/utils/date'
-import { h, ref, onMounted } from 'vue'
+import { computed, h, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElButton, ElButtonGroup, ElMessage, ElMessageBox, ElTag } from 'element-plus'
+import { stringify } from 'qs'
 
 const { t } = useI18n()
 
@@ -100,16 +103,21 @@ const router = useRouter()
 
 const tableData = ref([])
 const searchInfo = ref({})
+const loading = ref(false)
 
 const formData = ref({
   name: '',
   desc: '',
   host: '',
-  port: 0,
+  port: 8818,
   cloudAuth: false,
   sn: '',
   user: 'admin',
   password: 'admin1',
+})
+
+const hasValidDevice = computed(() => {
+  return formData.value.sn && formData.value.sn.length > 0
 })
 
 const type = ref('')
@@ -126,8 +134,8 @@ const columns = [
   { key: 'sn', dataKey: 'sn', title: t('iot.serialNumber'), width: 160, flexGrow: 1 },
   { key: 'name', dataKey: 'name', title: t('iot.name'), width: 180, flexGrow: 1 },
   { key: 'desc', dataKey: 'desc', title: t('general.description'), width: 240, flexGrow: 1 },
-  // { key: 'host', dataKey: 'host', title: t('iot.address'), width: 120 },
-  // { key: 'port', dataKey: 'port', title: t('iot.port'), width: 60 },
+  { key: 'host', dataKey: 'host', title: t('iot.address'), width: 120 },
+  { key: 'port', dataKey: 'port', title: t('iot.port'), width: 50 },
   { key: 'online', dataKey: 'online', title: t('iot.status'), width: 120, align: 'center', cellRenderer: ({ cellData }) =>
     h(
       ElTag,
@@ -195,7 +203,7 @@ const initForm = () => {
     name: '',
     desc: '',
     host: '',
-    port: 0,
+    port: 8818,
     cloudAuth: false,
     sn: '',
     user: 'admin',
@@ -278,7 +286,61 @@ const enterDialog = async() => {
   })
 }
 
+const fetchSN = async() => {
+  dataForm.value.validate(async valid => {
+    if (valid) {
+      loading.value = true
+      const res = await fetch_device_info({
+        host: formData.value.host,
+        port: formData.value.port,
+        user: formData.value.user,
+        password: formData.value.password
+      })
+      console.log(res.data)
+      loading.value = false
+      if (res.code === 0) {
+        if (res.data?.device?.cfg?.cloud?.ID) {
+          const sn = res.data?.device?.cfg?.cloud?.ID
+          const index = tableData.value.findIndex(dev => dev.sn === sn)
+          if (index !== -1) {
+            ElMessage({
+              type: 'error',
+              message: '设备' + sn + '已经添加，无法再次添加'
+            })
+          } else {
+            formData.value.sn = sn
+            ElMessage({
+              type: 'success',
+              message: '获取设备SN:' + sn
+            })
+          }
+        }
+      } else {
+        ElMessage({
+          type: 'error',
+          message: res.msg || t('general.editFailed')
+        })
+      }
+    } else {
+      ElMessage({
+        type: 'error',
+        message: '请填写设备基本信息'
+      })
+    }
+  })
+}
+
 const switchToCloud = async(toCloud) => {
+  dataForm.value.validate(async valid => {
+    if (valid) {
+      if (formData.value.sn && formData.value.sn !== '') {
+        await _switchToCloud(toCloud)
+      }
+    }
+  })
+}
+
+const _switchToCloud = async(toCloud) => {
   if (toCloud) {
     ElMessageBox.confirm('确定切换设备到云平台吗?', t('general.hint'), {
       confirmButtonText: t('general.confirm'),
@@ -286,7 +348,9 @@ const switchToCloud = async(toCloud) => {
       type: 'warning'
     })
       .then(async() => {
+        loading.value = true
         const res = await switch_cloud({})
+        loading.value = false
         if (res.code === 0) {
           ElMessage({
             type: 'success',
@@ -301,17 +365,28 @@ const switchToCloud = async(toCloud) => {
       cancelButtonText: t('general.cancel'),
       inputPattern: /\S/,
       inputErrorMessage: '不能为空',
-      inputValue: row.name
+      inputValue: window.localStorage.getItem('device.switchHost') || '',
     }).then(async({ value }) => {
-      row.name = value
-      // console.log(row)
-      const res = await editFileName(row)
+      window.localStorage.setItem('device.switchHost', value)
+      loading.value = true
+      const res = await switch_cloud({
+        cloud: value,
+        host: formData.value.host,
+        port: formData.value.port,
+        user: formData.value.user,
+        password: formData.value.password
+      })
+      loading.value = false
       if (res.code === 0) {
         ElMessage({
           type: 'success',
-          message: t('general.updateSuccess')
+          message: res.msg || t('general.updateSuccess')
         })
-        open()
+      } else {
+        ElMessage({
+          type: 'error',
+          message: res.msg || t('general.editFailed')
+        })
       }
     }).catch(() => {
       ElMessage({

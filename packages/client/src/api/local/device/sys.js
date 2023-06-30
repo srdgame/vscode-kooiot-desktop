@@ -17,6 +17,22 @@ export const switch_cloud = (data) => {
 }
 
 // @Tags IotDeviceSys
+// @Summary 获取设备信息
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body iot.request.FetchDeviceSN
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取设备信息命令发送成功"}"
+// @Router /local/device/sys/fetch_device_sn [post]
+export const fetch_device_info = (data) => {
+  return service({
+    url: '/local/device/sys/fetch_device_info',
+    method: 'post',
+    data
+  })
+}
+
+// @Tags IotDeviceSys
 // @Summary 云中心配置
 // @Security ApiKeyAuth
 // @accept application/json

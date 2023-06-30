@@ -1029,6 +1029,7 @@
         "enableCloudAuth": "云认证",
         "password": "密码",
         "switchToLocal": "切换到开发模式",
-        "switchToCloud": "切换到平台模式"
+        "switchToCloud": "切换到平台模式",
+        "fetchDeviceSN": "连接设备并获取SN"
     }
 }

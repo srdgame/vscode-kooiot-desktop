@@ -266,7 +266,7 @@ export class DataChannel {
     return this.devices.find(item => item.sn === sn)
   }
   pushData(device, input, prop, data) {
-    console.log('pushData', device, input, prop, data)
+    // console.log('pushData', device, input, prop, data)
     if (prop !== 'value') {
       // console.log('Skip prop', payload)
       return

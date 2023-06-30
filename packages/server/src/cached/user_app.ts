@@ -13,7 +13,7 @@ interface UserApp {
     description?: any;
 }
 
-async function downloadApp(app: any) {
+async function _downloadApp(app: any) {
     const params = {
         device: 'KOOIOT_DESKTOP_LOCAL_CACHE',
         token: 'KOOIOT_DESKTOP_LOCAL_CACHE',
@@ -33,6 +33,14 @@ async function downloadApp(app: any) {
     });
 }
 
+async function downloadApp(app: any) {
+    try {
+        await _downloadApp(app);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 async function removeApp(app: any) {
     const loadPath = path.join(Options.instance.cachedFolder, app?.ID + ".zip");
     fs.rm(loadPath, ()=>{});
@@ -49,103 +57,167 @@ router.post('/cached/user_app/create', async (ctx) => {
         };
         return;
     }
-
-    await Database.instance.dbCachedApps.insertAsync(ctx.request.body).then((value) => {
-        ctx.body = {
-            code: 0,
-            msg: 'Inserted',
-        };
-        // Do NOT use await, thus it blocks the post request
-        downloadApp(value);
-    }).catch((reason) => {
+    try {
+        await Database.instance.dbCachedApps.insertAsync(ctx.request.body).then((value) => {
+            ctx.body = {
+                code: 0,
+                msg: 'Inserted',
+            };
+            // Do NOT use await, thus it blocks the post request
+            downloadApp(value);
+        }).catch((reason) => {
+            ctx.body = {
+                code: 400,
+                msg: reason,
+            };
+        });
+    } catch (reason) {
         ctx.body = {
             code: 400,
             msg: reason,
         };
-    });
+    }
+    if (ctx.body === undefined || ctx.body.code === undefined) {
+        ctx.body = {
+            code: 400,
+            msg: 'App create Failed',
+        };
+    }
 });
 router.post('/cached/user_app/delete', async (ctx) => {
     const item = {
         ID: ctx.request.body?.ID
     };
     ctx.type = 'application/json';
-    await Database.instance.dbCachedApps.removeAsync(item, { multi: true }).then( (removed) => {
-        if (removed > 0) {
-            ctx.body = {
-                code: 0,
-                msg: 'Deleted',
-            };
-            removeApp(item);
-        } else {
-            ctx.body = {
-                code: 400,
-                msg: 'Deleted Failed',
-            };
-        }
-    });
+    try {
+        await Database.instance.dbCachedApps.removeAsync(item, { multi: true }).then( (removed) => {
+            if (removed > 0) {
+                ctx.body = {
+                    code: 0,
+                    msg: 'Deleted',
+                };
+                removeApp(item);
+            } else {
+                ctx.body = {
+                    code: 400,
+                    msg: 'Deleted Failed',
+                };
+            }
+        });
+    } catch (reason) {
+        ctx.body = {
+            code: 400,
+            msg: reason,
+        };
+    }
+    if (ctx.body === undefined || ctx.body.code === undefined) {
+        ctx.body = {
+            code: 400,
+            msg: 'App delete Failed',
+        };
+    }
 });
 router.put('/cached/user_app/update', async (ctx) => {
     const item = {
         ID: ctx.request.body?.ID
     };
     ctx.type = 'application/json';
-    await Database.instance.dbCachedApps.updateAsync(item, ctx.request.body, {}).then( ({ numAffected }) => {
-        if (numAffected >= 0) {
-            ctx.body = {
-                code: 0,
-                msg: 'Updated',
-            };
-        } else {
-            ctx.body = {
-                code: 400,
-                msg: 'Updated Failed',
-            };
-        }
-    });
+    try {
+        await Database.instance.dbCachedApps.updateAsync(item, ctx.request.body, {}).then( ({ numAffected }) => {
+            if (numAffected >= 0) {
+                ctx.body = {
+                    code: 0,
+                    msg: 'Updated',
+                };
+            } else {
+                ctx.body = {
+                    code: 400,
+                    msg: 'Updated Failed',
+                };
+            }
+        });
+    } catch (reason) {
+        ctx.body = {
+            code: 400,
+            msg: reason,
+        };
+    }
+    if (ctx.body === undefined || ctx.body.code === undefined) {
+        ctx.body = {
+            code: 400,
+            msg: 'App update Failed',
+        };
+    }
 });
 router.get('/cached/user_app/get', async (ctx) => {
     const item = {
         ID: ctx.request.query?.ID
     };
     ctx.type = 'application/json';
-    await Database.instance.dbCachedApps.findAsync(item).then( (apps) => {
-        if (apps.length === 1) {
-            ctx.body = {
-                code: 0,
-                data: {
-                    app: apps[0],
-                },
-                msg: 'Got App',
-            };
-        } else {
-            ctx.body = {
-                code: 400,
-                msg: 'Find app Failed',
-            };
-        }
-    });
+    try {
+        await Database.instance.dbCachedApps.findAsync(item).then( (apps) => {
+            if (apps.length === 1) {
+                ctx.body = {
+                    code: 0,
+                    data: {
+                        app: apps[0],
+                    },
+                    msg: 'Got App',
+                };
+            } else {
+                ctx.body = {
+                    code: 400,
+                    msg: 'Find app Failed',
+                };
+            }
+        });
+    } catch (reason) {
+        ctx.body = {
+            code: 400,
+            msg: reason,
+        };
+    }
+    if (ctx.body === undefined || ctx.body.code === undefined) {
+        ctx.body = {
+            code: 400,
+            msg: 'App get Failed',
+        };
+    }
 });
 router.post('/cached/user_app/find_by_id', async (ctx) => {
     const item = {
         app_id: ctx.request.body?.app_id
     };
     ctx.type = 'application/json';
-    await Database.instance.dbCachedApps.findAsync(item).then( (apps) => {
-        if (apps.length === 1) {
-            ctx.body = {
-                code: 0,
-                data: {
-                    app: apps[0],
-                },
-                msg: 'Got App',
-            };
-        } else {
-            ctx.body = {
-                code: 400,
-                msg: 'Find App Failed',
-            };
-        }
-    });
+    try {
+        await Database.instance.dbCachedApps.findAsync(item).then( (apps) => {
+            if (apps.length === 1) {
+                ctx.body = {
+                    code: 0,
+                    data: {
+                        app: apps[0],
+                    },
+                    msg: 'Got App',
+                };
+            } else {
+                ctx.body = {
+                    code: 400,
+                    msg: 'Find App Failed',
+                };
+            }
+        });
+    } catch (reason) {
+        ctx.body = {
+            code: 400,
+            msg: reason,
+        };
+    }
+    if (ctx.body === undefined || ctx.body.code === undefined) {
+        ctx.body = {
+            code: 400,
+            msg: 'App find Failed',
+        };
+    }
 });
 router.post('/cached/user_app/list', async (ctx) => {
     let item: UserApp = {};
@@ -156,15 +228,25 @@ router.post('/cached/user_app/list', async (ctx) => {
         item.description = { '$regex': '/' + ctx.request.body.description + '/' };
     }
     ctx.type = 'application/json';
-    await Database.instance.dbCachedApps.findAsync(item).then( (list) => {
+    try {
+        await Database.instance.dbCachedApps.findAsync(item).then( (list) => {
+            ctx.body = {
+                code: 0,
+                data: {
+                    list: list,
+                },
+                msg: 'Got List',
+            };
+        });
+    } catch (reason) {
         ctx.body = {
             code: 0,
             data: {
-                list: list,
+                list: [],
             },
-            msg: 'Got List',
+            msg: reason,
         };
-    });
+    }
     if (ctx.body === undefined || ctx.body.code === undefined) {
         ctx.body = {
             code: 0,

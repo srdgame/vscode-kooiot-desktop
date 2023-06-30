@@ -34,7 +34,7 @@ router.post('/local/user_app/create', async (ctx) => {
         fs.writeFileSync(infoPath, JSON.stringify(devices, null, 4), 'utf8');
         ctx.body = {
             code: 0,
-            msg: 'Created app'
+            msg: err
         };
     }
     if (ctx.body === undefined || ctx.body.code === undefined) {
@@ -63,6 +63,10 @@ router.post('/local/user_app/delete', async (ctx) => {
             };
         }
     } catch (err) {
+        ctx.body = {
+            code: 400,
+            msg: err
+        };
     }
     if (ctx.body === undefined || ctx.body.code === undefined) {
         ctx.body = {
@@ -90,6 +94,10 @@ router.put('/local/user_app/update', async (ctx) => {
             };
         }
     } catch (err) {
+        ctx.body = {
+            code: 400,
+            msg: err
+        };
     }
     if (ctx.body === undefined || ctx.body.code === undefined) {
         ctx.type = 'application/json';
@@ -118,6 +126,10 @@ router.get('/local/user_app/get', async (ctx) => {
             };
         }
     } catch (err) {
+        ctx.body = {
+            code: 400,
+            msg: err
+        };
     }
     if (ctx.body === undefined || ctx.body.code === undefined) {
         ctx.type = 'application/json';
@@ -157,6 +169,10 @@ router.post('/local/user_app/list', async (ctx) => {
             msg: 'List local apps OK!'
         };
     } catch (err) {
+        ctx.body = {
+            code: 400,
+            msg: err
+        };
     }
     if (ctx.body === undefined || ctx.body.code === undefined) {
         ctx.body = {
