@@ -60,6 +60,9 @@ export default {
 </script>
 
 <script setup>
+import {
+  fire_snapshot
+} from '@/api/local/device/data'
 import { get_device } from '@/api/local/device'
 import Overview from './component/overview/index.vue'
 import DeviceList from './component/deviceList/index.vue'
@@ -110,6 +113,7 @@ const loadDeviceInfo = () => {
   if (sn.value) {
     getDeviceInfo()
     connectMQTT()
+    refreshData()
   }
   checkTimer.value = checkTimer.value || setInterval(() => {
     if (sn.value) {
@@ -229,6 +233,12 @@ const openDevice = (sn) => {
     deviceStore.SaveDeviceList(sn.value, openDeviceList.value)
   }
   tabActive.value = sn
+}
+
+const refreshData = async() => {
+  const res = await fire_snapshot({
+    device: sn.value
+  })
 }
 
 onMounted(async() => {
