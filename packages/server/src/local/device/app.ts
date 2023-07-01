@@ -3,6 +3,7 @@
 import Router from 'koa-router';
 import * as fs from 'fs';
 import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { MQTTBroker } from '../../mqttBroker';
 
 const router = new Router();
@@ -11,12 +12,22 @@ interface Device {
     name: string;
 }
 
+const publishToMQTT = (gateway: string, topic: string, data: any) => {
+    const topicReal = gateway + topic;
+    const payload = JSON.stringify({
+        id: uuidv4(),
+        data: data
+    });
+    MQTTBroker.instance.publish(topicReal, payload, false, 0);
+};
+
 router.post('/local/device/app/list', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/list';
-        const payload = JSON.stringify({
-        });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        publishToMQTT(ctx.request.body?.device, '/app/list', {});
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -32,14 +43,16 @@ router.post('/local/device/app/list', async (ctx) => {
 });
 router.post('/local/device/app/install', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/install';
-        const payload = JSON.stringify({
+        publishToMQTT(ctx.request.body?.device, '/app/install', {
             inst: ctx.request.body?.inst,
             conf: ctx.request.body?.conf || {},
             version: ctx.request.body?.version || 'latest',
             name: ctx.request.body?.name,
         });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -55,11 +68,13 @@ router.post('/local/device/app/install', async (ctx) => {
 });
 router.post('/local/device/app/uninstall', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/uninstall';
-        const payload = JSON.stringify({
+        publishToMQTT(ctx.request.body?.device, '/app/uninstall', {
             inst: ctx.request.body?.inst
         });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -75,13 +90,15 @@ router.post('/local/device/app/uninstall', async (ctx) => {
 });
 router.post('/local/device/app/upgrade', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/upgrade';
-        const payload = JSON.stringify({
+        publishToMQTT(ctx.request.body?.device, '/app/upgrade', {
             inst: ctx.request.body?.inst,
             version: ctx.request.body?.version || 'latest',
             name: ctx.request.body?.name,
         });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -97,12 +114,14 @@ router.post('/local/device/app/upgrade', async (ctx) => {
 });
 router.post('/local/device/app/config', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/conf';
-        const payload = JSON.stringify({
+        publishToMQTT(ctx.request.body?.device, '/app/conf', {
             inst: ctx.request.body?.inst,
             conf: ctx.request.body?.conf || {},
         });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -118,13 +137,15 @@ router.post('/local/device/app/config', async (ctx) => {
 });
 router.post('/local/device/app/option', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/option';
-        const payload = JSON.stringify({
+        publishToMQTT(ctx.request.body?.device, '/app/option', {
             inst: ctx.request.body?.inst,
             option: ctx.request.body?.option,
             value: ctx.request.body?.value,
         });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -140,12 +161,14 @@ router.post('/local/device/app/option', async (ctx) => {
 });
 router.post('/local/device/app/start', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/start';
-        const payload = JSON.stringify({
+        publishToMQTT(ctx.request.body?.device, '/app/start', {
             inst: ctx.request.body?.inst,
             reason: ctx.request.body?.reason,
         });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -161,12 +184,14 @@ router.post('/local/device/app/start', async (ctx) => {
 });
 router.post('/local/device/app/stop', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/stop';
-        const payload = JSON.stringify({
+        publishToMQTT(ctx.request.body?.device, '/app/stop', {
             inst: ctx.request.body?.inst,
             reason: ctx.request.body?.reason,
         });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -182,12 +207,14 @@ router.post('/local/device/app/stop', async (ctx) => {
 });
 router.post('/local/device/app/restart', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/restart';
-        const payload = JSON.stringify({
+        publishToMQTT(ctx.request.body?.device, '/app/restart', {
             inst: ctx.request.body?.inst,
             reason: ctx.request.body?.reason,
         });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -203,12 +230,14 @@ router.post('/local/device/app/restart', async (ctx) => {
 });
 router.post('/local/device/app/rename', async (ctx) => {
     try {
-        const topic = '/' + ctx.request.body?.device + '/app/rename';
-        const payload = JSON.stringify({
+        publishToMQTT(ctx.request.body?.device, '/app/rename', {
             inst: ctx.request.body?.inst,
             new_name: ctx.request.body?.new_name,
         });
-        MQTTBroker.instance.publish(topic, payload, false, 0);
+        ctx.body = {
+            code: 0,
+            msg: 'Done'
+        };
     } catch (err) {
         ctx.body = {
             code: 500,
@@ -227,7 +256,7 @@ router.post('/local/device/app/query_log', async (ctx) => {
         ctx.type = 'application/json';
         ctx.body = {
             code: 400,
-            msg: 'Failed to create device'
+            msg: 'Not implemented'
         };
     }
 });
@@ -236,7 +265,7 @@ router.post('/local/device/app/query_comm', async (ctx) => {
         ctx.type = 'application/json';
         ctx.body = {
             code: 400,
-            msg: 'Failed to create device'
+            msg: 'Not implemented'
         };
     }
 });
@@ -245,7 +274,7 @@ router.post('/local/device/app/upload_comm', async (ctx) => {
         ctx.type = 'application/json';
         ctx.body = {
             code: 400,
-            msg: 'Failed to create device'
+            msg: 'Not implemented'
         };
     }
 });

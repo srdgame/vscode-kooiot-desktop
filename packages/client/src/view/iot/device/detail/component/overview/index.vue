@@ -330,7 +330,7 @@ const enterDialog = async() => {
   })
 }
 const checkUpdate = async() => {
-  const res = await check_update({ device: props.device.sn })
+  const res = await check_update({ device: props.device.sn, platform: deviceStatus.value.platform })
   if (res.code === 0) {
     if (res.data?.data) {
       latest.value = {

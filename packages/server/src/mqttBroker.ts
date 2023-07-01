@@ -6,7 +6,7 @@ import { Database } from './database';
 import Aedes from 'aedes';
 import AedesServerFactory from 'aedes-server-factory';
 
-const topicRegex = new RegExp('^([^/]+)/(.+)$');
+const topicRegex = new RegExp('^([^/]+)/([^/]+)(.*)$');
 
 export class MQTTBroker {
     private static _instance: MQTTBroker;
@@ -57,6 +57,9 @@ export class MQTTBroker {
                         console.log('Device updated Failed!!!');
                     }
                 });
+            } else if(msgTopic === 'result') {
+                console.log('Device result', groups[3], packet.payload.toString());
+                // TODO: Save the result for action
             }
         });
         this._broker = aedes;
@@ -71,9 +74,13 @@ export class MQTTBroker {
             retain: retain,
             cmd: 'publish',
             qos: qos,
-            dup: false
+            dup: true
         }, (error) => {
-            console.log(error);
+            if (error) {
+                console.log(error);
+            } else {
+                console.log("publish done", topic, payload);
+            }
         });
     }
 }

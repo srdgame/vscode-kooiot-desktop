@@ -75,6 +75,9 @@ export default {
 
 <script setup>
 import {
+  fire_snapshot
+} from '@/api/local/device/data'
+import {
   sys_option,
   // update_cloud_config
 } from '@/api/local/device/sys'
@@ -138,7 +141,9 @@ const deviceStatus = computed(() => {
 })
 
 const refreshData = async() => {
-  // TODO:
+  const res = await fire_snapshot({
+    device: props.device.sn
+  })
 }
 
 // const expandSelect = (row, expandedRows) => {

@@ -37,22 +37,6 @@ export const fetch_device_info = (data) => {
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body iot.request.DeviceBase
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"云中心配置命令发送成功"}"
-// @Router /local/device/sys/cloud_config [get]
-export const get_cloud_config = (params) => {
-  return service({
-    url: '/local/device/sys/cloud_config',
-    method: 'get',
-    params
-  })
-}
-
-// @Tags IotDeviceSys
-// @Summary 云中心配置
-// @Security ApiKeyAuth
-// @accept application/json
-// @Produce application/json
 // @Param data body iot.request.DeviceCloudConf
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"云中心配置命令发送成功"}"
 // @Router /local/device/sys/cloud_config [post]
