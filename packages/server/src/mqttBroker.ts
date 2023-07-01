@@ -1,5 +1,7 @@
 'use strict';
+import * as util from 'util';
 import * as fs from 'fs';
+import pako from 'pako';
 import axios from 'axios';
 import { Options } from './options';
 import { Database } from './database';
@@ -60,6 +62,20 @@ export class MQTTBroker {
             } else if(msgTopic === 'result') {
                 console.log('Device result', groups[3], packet.payload.toString());
                 // TODO: Save the result for action
+            } else if(msgTopic === 'apps_gz') {
+                let payload : any = packet.payload;
+                let apps = JSON.parse(pako.inflate(payload, { to: 'string' }));
+                try {
+                    Database.instance.dbDevices.updateAsync({ sn: gateway }, { $set: {installedApps: apps} }, {}).then( ({ numAffected }) => {
+                        if (numAffected <= 0) {
+                            console.log('Device updated Failed!!!');
+                        } else {
+                            console.log('Device updated apps done!');
+                        }
+                    });
+                } catch (err) {
+                    console.log(err);
+                }
             }
         });
         this._broker = aedes;

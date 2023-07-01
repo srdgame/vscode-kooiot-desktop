@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { MQTTBroker } from '../../mqttBroker';
+import { Database } from '../../database';
 
 const router = new Router();
 
@@ -22,6 +23,58 @@ const publishToMQTT = (gateway: string, topic: string, data: any) => {
 };
 
 router.post('/local/device/app/list', async (ctx) => {
+    try {
+        const apps :any[] = [];
+        await Database.instance.dbDevices.findAsync({
+            sn: ctx.request.body?.device
+        }).then( (devices) => {
+            if (devices.length >= 1) {
+                const installedApps = devices[0].installedApps;
+                for (const k in installedApps) {
+                    let app = installedApps[k];
+                    app.inst = k;
+                    apps.push(app);
+                }
+            }
+        });
+
+        for(let i:number = 0; i< apps.length; i++) {
+            let app = apps[i];
+            if (app.version !== 0 && app.version !== '0') {
+                await Database.instance.dbCachedApps.findAsync({
+                    app_id: app.name
+                }).then( (result) => {
+                    if (result.length >= 1) {
+                        app.app = result[0];
+                        app.app_latest = {
+                            app_id: app.name,
+                            version: result[0].cache_version
+                        };
+                    }
+                });
+            }
+        }
+        ctx.body = {
+            code: 0,
+            data: {
+                apps: apps,
+            },
+            msg: 'Got application list',
+        };
+    } catch (reason) {
+        ctx.body = {
+            code: 400,
+            msg: reason,
+        };
+    }
+    if (ctx.body === undefined || ctx.body.code === undefined) {
+        ctx.body = {
+            code: 400,
+            msg: 'App List request failed'
+        };
+    }
+});
+router.post('/local/device/app/refresh', async (ctx) => {
     try {
         publishToMQTT(ctx.request.body?.device, '/app/list', {});
         ctx.body = {

@@ -54,7 +54,7 @@ watch(() => props.val, (newValue, oldValue) => {
   }
 }, { immediate: true })
 
-onMounted(async() => {
+onMounted(() => {
   value.value = props.val
 })
 

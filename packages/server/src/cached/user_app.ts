@@ -150,8 +150,9 @@ router.put('/cached/user_app/update', async (ctx) => {
     }
 });
 router.get('/cached/user_app/get', async (ctx) => {
+    const id : any = ctx.request.query.ID;
     const item = {
-        ID: ctx.request.query?.ID
+        ID: parseInt(id)
     };
     ctx.type = 'application/json';
     try {
@@ -165,6 +166,8 @@ router.get('/cached/user_app/get', async (ctx) => {
                     msg: 'Got App',
                 };
             } else {
+                console.log(item);
+                console.log(Database.instance.dbCachedApps.getAllData());
                 ctx.body = {
                     code: 400,
                     msg: 'Find app Failed',
