@@ -132,6 +132,7 @@ router.get('/cached/template/get', async (ctx) => {
 });
 router.post('/cached/template/list', async (ctx) => {
     const item = {
+        app_id: ctx.request.body?.app_id,
         name: { '$regex': '/' + ctx.request.body?.name + '/',  }
     };
     ctx.type = 'application/json';

@@ -3,7 +3,7 @@
   <div>
     <el-form :inline="true">
       <el-form-item>
-        <el-button type="primary" plain icon="search" @click="onSelectFromStore">{{ t('iot.selectFromStore') }}</el-button>
+        <el-button type="primary" plain icon="search" @click="onSelectFromStore">{{ t('iot.selectFromLocalCache') }}</el-button>
         <el-button type="danger" plain icon="delete" @click="onClean">{{ t('iot.clean') }}</el-button>
       </el-form-item>
     </el-form>
@@ -68,7 +68,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="dialogFromStoreVisiable" :before-close="closeFromStoreDlg" :title="t('iot.selectFromStore')">
+    <el-dialog v-model="dialogFromStoreVisiable" :before-close="closeFromStoreDlg" :title="t('iot.selectFromLocalCache')">
       <div v-if="hasSearch" style="dispaly:inline">
         <el-form ref="searchForm" :inline="true" :model="searchInfo" :style="{paddingBottom:'5px', paddingLeft:'10px'}">
           <el-form-item :label="t('iot.name')">
@@ -115,7 +115,7 @@ export default {
 </script>
 
 <script setup>
-import { get_template_list } from '@/api/store/template'
+import { get_template_list } from '@/api/cached/template'
 import { get_latest } from '@/api/store/template_version'
 import { toSQLLine } from '@/utils/stringFun'
 import { onMounted, nextTick, ref } from 'vue'

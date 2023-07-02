@@ -1,14 +1,21 @@
 'use strict';
 import * as fs from 'fs';
 import * as path from 'path';
+import MakeDir from 'make-dir';
 import Router from 'koa-router';
 import { Database } from '../database';
 import { downloadFile } from '../download';
 import { Options } from '../options';
 
 const router = new Router();
+interface CoreApp {
+    name?: any;
+    description?: any;
+}
 
 async function _downloadApp(app: any) {
+    const cachedFolder = path.join(Options.instance.cachedFolder, 'user_app');
+    await MakeDir(cachedFolder);
     const params = {
         device: 'KOOIOT_DESKTOP_LOCAL_CACHE',
         token: 'KOOIOT_DESKTOP_LOCAL_CACHE',
@@ -18,12 +25,12 @@ async function _downloadApp(app: any) {
         platform: app.system?.name + "/" + app.system?.version + "/" + app.hardware?.name,
     };
     const url = Options.instance.cloudHost + "/pkg/download";
-    const loadPath = path.join(Options.instance.cachedFolder, app.ID + ".tar.gz");
+    const loadPath = path.join(cachedFolder, app.ID + "_" + params.version + ".tar.gz");
     downloadFile(url, params, loadPath, (progress) => {
-        Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: {progress: progress} }, {});
+        Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { progress: progress } }, {});
     }).then((filePath) => {
         console.log(`File download completed to ${filePath}`);
-        Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { progress: 100 } }, {});
+        Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { progress: 100, cache_path: loadPath } }, {});
     }).catch((reason) => {
         console.log(`File download failed ${reason}`);
         Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { progress: -1 } }, {});
@@ -220,11 +227,16 @@ router.post('/cached/core_app/find_by_id', async (ctx) => {
     }
 });
 router.post('/cached/core_app/list', async (ctx) => {
-    const item = {
-        name: { '$regex': '/' + ctx.request.body?.name + '/',  }
-    };
+    let item: CoreApp = {};
+    if (ctx.request.body?.name) {
+        item.name = { '$regex': '/' + ctx.request.body.name + '/' };
+    }
+    if (ctx.request.body?.description) {
+        item.description = { '$regex': '/' + ctx.request.body.description + '/' };
+    }
     ctx.type = 'application/json';
     try{
+        // console.log(Database.instance.dbCachedExts.getAllData());
         await Database.instance.dbCachedExts.findAsync(item).then( (list) => {
             ctx.body = {
                 code: 0,

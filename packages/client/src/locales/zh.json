@@ -826,6 +826,7 @@
         "waitPlease": "请等待...",
         "change": "改变",
         "selectFromStore": "选择在线模板",
+        "selectFromLocalCache": "选择缓存的模板",
         "addSelectedItems": "添加已选中项目",
         "templateAlreadyAdded": "模板已经添加",
         "clearAllSelectedTemplates": "确定要清空已选择模板?",

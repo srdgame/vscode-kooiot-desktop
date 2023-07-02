@@ -179,6 +179,7 @@ const cacheApp = async(row) => {
       type: 'error',
       message: '应用没有可缓存的版本文件'
     })
+    return
   }
   row.cache_version = version
   row.progress = 0

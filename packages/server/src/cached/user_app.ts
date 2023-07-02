@@ -1,6 +1,7 @@
 'use strict';
 import * as path from 'path';
 import * as fs from 'fs';
+import MakeDir from 'make-dir';
 import Router from 'koa-router';
 import { Database } from '../database';
 import { downloadFile } from '../download';
@@ -14,6 +15,8 @@ interface UserApp {
 }
 
 async function _downloadApp(app: any) {
+    const cachedFolder = path.join(Options.instance.cachedFolder, 'user_app');
+    await MakeDir(cachedFolder);
     const params = {
         device: 'KOOIOT_DESKTOP_LOCAL_CACHE',
         token: 'KOOIOT_DESKTOP_LOCAL_CACHE',
@@ -21,12 +24,12 @@ async function _downloadApp(app: any) {
         version: app.cache_version,
     };
     const url = Options.instance.cloudHost + "/pkg/download";
-    const loadPath = path.join(Options.instance.cachedFolder, app.ID + ".zip");
+    const loadPath = path.join(cachedFolder, app.ID + "_" + params.version + ".zip");
     downloadFile(url, params, loadPath, (progress) => {
-        Database.instance.dbCachedApps.updateAsync({ ID: app.ID }, { $set: {progress: progress} }, {});
+        Database.instance.dbCachedApps.updateAsync({ ID: app.ID }, { $set: { progress: progress } }, {});
     }).then((filePath) => {
         console.log(`File download completed to ${filePath}`);
-        Database.instance.dbCachedApps.updateAsync({ ID: app.ID },  { $set: { progress: 100 } }, {});
+        Database.instance.dbCachedApps.updateAsync({ ID: app.ID },  { $set: { progress: 100, cache_path: loadPath  } }, {});
     }).catch((reason) => {
         console.log(`File download failed ${reason}`);
         Database.instance.dbCachedApps.updateAsync({ ID: app.ID },  { $set: { progress: -1 } }, {});

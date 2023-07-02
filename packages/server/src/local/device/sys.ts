@@ -17,11 +17,13 @@ interface Device {
 
 const publishToMQTT = (gateway: string, topic: string, data: any) => {
     const topicReal = gateway + topic;
+    const id = uuidv4();
     const payload = JSON.stringify({
-        id: uuidv4(),
+        id: id,
         data: data
     });
     MQTTBroker.instance.publish(topicReal, payload, false, 0);
+    return id;
 };
 
 function sleep(ms: number) {
@@ -111,9 +113,10 @@ router.post('/local/device/sys/fetch_device_info', async (ctx) => {
 });
 router.post('/local/device/sys/cloud_config', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/sys/cloud_conf', ctx.request.body?.conf || {});
+        const id = publishToMQTT(ctx.request.body?.device, '/sys/cloud_conf', ctx.request.body?.conf || {});
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -174,13 +177,14 @@ router.post('/local/device/sys/check_update', async (ctx) => {
 });
 router.post('/local/device/sys/upgrade', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, '/sys/upgrade', {
+        const id = publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, '/sys/upgrade', {
             no_ack: true,
             version: ctx.request.body?.version,
             skynet: ctx.request.body?.skynet,
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -203,17 +207,19 @@ router.post('/local/device/sys/option', async (ctx) => {
         if (option === 'EnableData') {
             topic = '/sys/enable/data';
         } else if (option === 'EnableDataOneShort') {
-            topic = '/sys/enable/data';
+            topic = '/sys/enable/data_one_short';
+        } else if (option === 'EnableCache') {
+            topic = '/sys/enable/data_cache';
         } else if (option === 'EnableLog') {
-            topic = '/sys/enable/data';
+            topic = '/sys/enable/log';
         } else if (option === 'EnableComm') {
-            topic = '/sys/enable/data';
+            topic = '/sys/enable/comm';
         } else if (option === 'EnableStat') {
-            topic = '/sys/enable/data';
+            topic = '/sys/enable/stat';
         } else if (option === 'EnableEvent') {
-            topic = '/sys/enable/data';
+            topic = '/sys/enable/event';
         } else if (option === 'EnableBeta') {
-            topic = '/sys/enable/data';
+            topic = '/sys/enable/beta';
         } else {
             ctx.body = {
                 code: 500,
@@ -221,9 +227,10 @@ router.post('/local/device/sys/option', async (ctx) => {
             };
         }
 
-        publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, topic, ctx.request.body?.value);
+        const id = publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, topic, ctx.request.body?.value);
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -241,9 +248,10 @@ router.post('/local/device/sys/option', async (ctx) => {
 });
 router.post('/local/device/sys/batch_script', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, '/sys/upgrade', ctx.request.body?.script);
+        const id = publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, '/sys/upgrade', ctx.request.body?.script);
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -261,9 +269,10 @@ router.post('/local/device/sys/batch_script', async (ctx) => {
 });
 router.post('/local/device/sys/restart', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, '/sys/restart', {});
+        const id = publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, '/sys/restart', {});
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -281,9 +290,10 @@ router.post('/local/device/sys/restart', async (ctx) => {
 });
 router.post('/local/device/sys/reboot', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, '/sys/reboot', {});
+        const id = publishToMQTT(ctx.request.body?.gateway || ctx.request.body?.device, '/sys/reboot', {});
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {

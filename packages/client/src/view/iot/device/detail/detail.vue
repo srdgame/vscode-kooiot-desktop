@@ -244,6 +244,9 @@ const refreshData = async() => {
 onMounted(async() => {
   deviceStore.Connect()
   tabActive.value = deviceStore.LoadActiveTab(sn.value, 'overview')
+  if (tabActive.value === 'installApp') {
+    tabActive.value = 'overview'
+  }
   loadDeviceInfo()
 })
 

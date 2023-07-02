@@ -50,7 +50,6 @@ export class MessageChannel {
     this.isShow = true
     this.newArrive = 0
     this.active = false
-    this.is_sub = false
     this.update_cb = () => {}
   }
   setUpdateCB(cb) {
@@ -502,9 +501,9 @@ export class Device {
     const index = this.comm.findIndex(item => item.key === key)
     return index !== -1
   }
-  subComm(key) {
+  subComm(key, channel) {
     if (this.comm.length <= 0) {
-      const chn = new MessageChannel(key)
+      const chn = channel || new MessageChannel(key)
       this.comm.push(chn)
       this.commQuery(60)
       return chn
@@ -513,7 +512,7 @@ export class Device {
       if (index !== -1) {
         return this.comm[index]
       } else {
-        const chn = new MessageChannel(key)
+        const chn = channel || new MessageChannel(key)
         this.comm.push(chn)
         return chn
       }

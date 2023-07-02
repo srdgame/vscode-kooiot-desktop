@@ -251,32 +251,14 @@ const loadApp = async(app_id) => {
       } else {
         tabActiveUI.value = 'edit'
       }
-      nextTick(function() {
-        loadVersion(app_id)
-      })
+      formData.value.version = appInfo.value.cache_version
+
     } else {
       ElMessage({
         type: 'error',
         message: t('iot.fetchAppInfoFailed')
       })
     }
-  }
-}
-const loadVersion = async(app_id) => {
-  const res = await get_latest({ ID: app_id, beta: props.device.beta_mode })
-  if (res.code === 0) {
-    if (res.data?.version) {
-      formData.value.version = res.data.version.version
-      // console.log(formData)
-    } else {
-      formData.value.version = 0
-      ElMessage({
-        type: 'error',
-        message: t('iot.appVersionFetchFailed')
-      })
-    }
-  } else {
-    formData.value.version = 0
   }
 }
 

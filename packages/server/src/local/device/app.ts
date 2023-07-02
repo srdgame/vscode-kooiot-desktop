@@ -76,9 +76,10 @@ router.post('/local/device/app/list', async (ctx) => {
 });
 router.post('/local/device/app/refresh', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/list', {});
+        const id = publishToMQTT(ctx.request.body?.device, '/app/list', {});
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -96,7 +97,7 @@ router.post('/local/device/app/refresh', async (ctx) => {
 });
 router.post('/local/device/app/install', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/install', {
+        const id = publishToMQTT(ctx.request.body?.device, '/app/install', {
             inst: ctx.request.body?.inst,
             conf: ctx.request.body?.conf || {},
             version: ctx.request.body?.version || 'latest',
@@ -104,6 +105,7 @@ router.post('/local/device/app/install', async (ctx) => {
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -121,11 +123,12 @@ router.post('/local/device/app/install', async (ctx) => {
 });
 router.post('/local/device/app/uninstall', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/uninstall', {
+        const id = publishToMQTT(ctx.request.body?.device, '/app/uninstall', {
             inst: ctx.request.body?.inst
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -143,13 +146,14 @@ router.post('/local/device/app/uninstall', async (ctx) => {
 });
 router.post('/local/device/app/upgrade', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/upgrade', {
+        const id = publishToMQTT(ctx.request.body?.device, '/app/upgrade', {
             inst: ctx.request.body?.inst,
             version: ctx.request.body?.version || 'latest',
             name: ctx.request.body?.name,
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -167,12 +171,13 @@ router.post('/local/device/app/upgrade', async (ctx) => {
 });
 router.post('/local/device/app/config', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/conf', {
+        const id = publishToMQTT(ctx.request.body?.device, '/app/conf', {
             inst: ctx.request.body?.inst,
             conf: ctx.request.body?.conf || {},
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -190,13 +195,14 @@ router.post('/local/device/app/config', async (ctx) => {
 });
 router.post('/local/device/app/option', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/option', {
+        const id = publishToMQTT(ctx.request.body?.device, '/app/option', {
             inst: ctx.request.body?.inst,
             option: ctx.request.body?.option,
             value: ctx.request.body?.value,
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -214,12 +220,13 @@ router.post('/local/device/app/option', async (ctx) => {
 });
 router.post('/local/device/app/start', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/start', {
+        const id = publishToMQTT(ctx.request.body?.device, '/app/start', {
             inst: ctx.request.body?.inst,
             reason: ctx.request.body?.reason,
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -237,12 +244,13 @@ router.post('/local/device/app/start', async (ctx) => {
 });
 router.post('/local/device/app/stop', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/stop', {
+        const id = publishToMQTT(ctx.request.body?.device, '/app/stop', {
             inst: ctx.request.body?.inst,
             reason: ctx.request.body?.reason,
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -260,12 +268,13 @@ router.post('/local/device/app/stop', async (ctx) => {
 });
 router.post('/local/device/app/restart', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/restart', {
+        const id = publishToMQTT(ctx.request.body?.device, '/app/restart', {
             inst: ctx.request.body?.inst,
             reason: ctx.request.body?.reason,
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {
@@ -283,12 +292,13 @@ router.post('/local/device/app/restart', async (ctx) => {
 });
 router.post('/local/device/app/rename', async (ctx) => {
     try {
-        publishToMQTT(ctx.request.body?.device, '/app/rename', {
+        const id = publishToMQTT(ctx.request.body?.device, '/app/rename', {
             inst: ctx.request.body?.inst,
             new_name: ctx.request.body?.new_name,
         });
         ctx.body = {
             code: 0,
+            data: { id: id },
             msg: 'Done'
         };
     } catch (err) {

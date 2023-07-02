@@ -102,6 +102,7 @@ import {
 } from '@/api/cached/core_app'
 import { toSQLLine } from '@/utils/stringFun'
 import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 // import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
@@ -181,6 +182,7 @@ const cacheApp = async(row) => {
       type: 'error',
       message: '应用没有可缓存的版本文件'
     })
+    return
   }
   row.cache_version = version
   row.progress = 0

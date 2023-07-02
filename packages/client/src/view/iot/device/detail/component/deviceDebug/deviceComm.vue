@@ -69,6 +69,7 @@ const props = defineProps({
   }
 })
 
+const device = ref(props.device.sn)
 const filter = ref('')
 const subscribed = ref(false)
 const show_hex = ref(true)
@@ -77,7 +78,7 @@ const channel = ref(null)
 const plTabComm = ref(null)
 
 const tableData = ref([])
-const dataCount = ref('')
+const dataCount = ref('0')
 
 const page_key = ref('device_debug')
 const rowHeight = ref(40)
@@ -107,6 +108,10 @@ watch(show_hex, (val, old_val) => {
 })
 
 watch(() => props.device, (val) => {
+  if (val.sn === device.value) {
+    return
+  }
+  device.value = val.sn
   if (channel.value) {
     channel.value.setUpdateCB(() => {})
     channel.value = null
@@ -117,7 +122,7 @@ watch(() => props.device, (val) => {
   nextTick(_ => {
     subscribed.value = props.mqtt.isCommSub(page_key.value)
     if (subscribed.value) {
-      channel.value = props.mqtt.subComm(page_key.value)
+      channel.value = props.mqtt.subComm(page_key.value, channel.value)
       channel.value.setUpdateCB((val) => {
         tableData.value = val.dataArr?.slice(0)
         dataCount.value = val.dataArr?.length + '/' + val.allData?.length
@@ -135,7 +140,7 @@ const onSubmit = () => {
 }
 
 const createChannel = async() => {
-  channel.value = await props.mqtt.subComm(page_key.value)
+  channel.value = await props.mqtt.subComm(page_key.value, channel.value)
   subscribed.value = true
   channel.value.setFilter(filter.value)
   channel.value.setUpdateCB((val) => {
