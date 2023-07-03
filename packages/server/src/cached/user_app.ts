@@ -29,7 +29,7 @@ async function _downloadApp(app: any) {
         Database.instance.dbCachedApps.updateAsync({ ID: app.ID }, { $set: { progress: progress } }, {});
     }).then((filePath) => {
         console.log(`File download completed to ${filePath}`);
-        Database.instance.dbCachedApps.updateAsync({ ID: app.ID },  { $set: { progress: 100, cache_path: loadPath  } }, {});
+        Database.instance.dbCachedApps.updateAsync({ ID: app.ID },  { $set: { progress: 100 } }, {});
     }).catch((reason) => {
         console.log(`File download failed ${reason}`);
         Database.instance.dbCachedApps.updateAsync({ ID: app.ID },  { $set: { progress: -1 } }, {});
@@ -84,6 +84,28 @@ router.post('/cached/user_app/create', async (ctx) => {
         ctx.body = {
             code: 400,
             msg: 'App create Failed',
+        };
+    }
+});
+router.post('/cached/user_app/upgrade', async (ctx) => {
+    ctx.type = 'application/json';
+
+    const apps = await Database.instance.dbCachedApps.findAsync({ ID: ctx.request.body?.ID });
+    if (apps?.length > 0) {
+        let app = apps[0];
+        app.cache_version = ctx.request.body?.version;
+        Database.instance.dbCachedApps.updateAsync({ ID: app.ID },  { $set: { progress: 0, cache_version: app.cache_version } }, {});
+        downloadApp(app);
+        ctx.body = {
+            code: 0,
+            msg: 'App upgrade is running',
+        };
+        return;
+    }
+    if (ctx.body === undefined || ctx.body.code === undefined) {
+        ctx.body = {
+            code: 400,
+            msg: 'App upgrade Failed',
         };
     }
 });

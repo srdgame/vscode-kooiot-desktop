@@ -180,7 +180,7 @@ onBeforeRouteUpdate((to, form) => {
 })
 
 const onCacheApp = async() => {
-  const res = await create_app(app)
+  const res = await create_app(appInfo.value)
   if (res.code === 0) {
     ElMessage({
       type: 'success',

@@ -116,7 +116,7 @@ export default {
 
 <script setup>
 import { get_template_list } from '@/api/cached/template'
-import { get_latest } from '@/api/store/template_version'
+import { get_latest } from '@/api/cached/template'
 import { toSQLLine } from '@/utils/stringFun'
 import { onMounted, nextTick, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'

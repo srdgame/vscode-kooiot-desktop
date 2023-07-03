@@ -43,3 +43,15 @@ export function downloadFile(url: string, params: any, filePath: string, listene
         });
     });
 }
+
+export function downloadFileHash(url: string, params: any) {
+    return new Promise((resolve, reject) => {
+        axios.post(url, {
+            params: params
+        }).then(response => {
+            resolve(response);
+        }).catch(error => {
+            reject(error);
+        });
+    });
+}

@@ -137,28 +137,22 @@ router.post('/local/device/sys/check_update', async (ctx) => {
     try {
         const platform = ctx.request.body?.platform || 'any/any/any';
         // FreeIOE app id is 1
-        const app : any = await Database.instance.dbCachedExts.findAsync({ ID: 1 });
-        if (app?.length <= 0) {
-            ctx.body = {
-                code: 400,
-                msg: 'FreeIOE app not cached!',
-            };
-            return;
+        const apps : any = await Database.instance.dbCachedExts.findAsync({ ID: 1 });
+        let freeioeVersion = 0;
+        if (apps?.length > 0) {
+            freeioeVersion = apps[0].cache_version;
         }
-        const coreApp : any = await Database.instance.dbCachedExts.findAsync({ platform_path: platform });
-        if (app?.length <= 0) {
-            ctx.body = {
-                code: 400,
-                msg: 'Skynet app not cached!',
-            };
-            return;
+        const coreApps : any = await Database.instance.dbCachedExts.findAsync({ platform_path: platform });
+        let coreAppVersion = 0;
+        if (coreApps?.length > 0) {
+            coreAppVersion = coreApps[0].cache_version;
         }
 
         ctx.body = {
             code: 0,
             data: {
-                version: app.cache_version,
-                skynet_version: coreApp.cache_version,
+                version: freeioeVersion,
+                skynet_version: coreAppVersion,
             },
             msg: 'Fetched latest FreeIOE/Skynet version'
         };

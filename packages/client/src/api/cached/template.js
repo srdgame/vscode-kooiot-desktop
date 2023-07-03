@@ -64,6 +64,22 @@ export const get_template = (params) => {
   })
 }
 
+// @Tags StoreTemplateVersion
+// @Summary 用模板id查询StoreTemplate最新版本
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body store.TemplateVersion true "用模板id查询StoreTemplate最新版本"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
+// @Router /store/template/version/latest [get]
+export const get_latest = (params) => {
+  return service({
+    url: '/cached/template/latest',
+    method: 'get',
+    params
+  })
+}
+
 // @Tags StoreTemplate
 // @Summary 分页获取StoreTemplate列表
 // @Security ApiKeyAuth

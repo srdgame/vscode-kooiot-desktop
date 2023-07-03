@@ -113,7 +113,6 @@ const loadDeviceInfo = () => {
   if (sn.value) {
     getDeviceInfo()
     connectMQTT()
-    refreshData()
   }
   checkTimer.value = checkTimer.value || setInterval(() => {
     if (sn.value) {
@@ -143,12 +142,13 @@ const connectMQTT = async() => {
   openDeviceList.value = loadList
 }
 
-onBeforeRouteUpdate((to, form) => {
+onBeforeRouteUpdate(async(to, form) => {
   if (to.name === route_name.value) {
     if (sn.value !== to.params.sn) {
       sn.value = to.params.sn
       tabActive.value = deviceStore.LoadActiveTab(sn.value, 'overview')
       loadDeviceInfo()
+      await refreshData()
     }
   }
 })
@@ -248,6 +248,7 @@ onMounted(async() => {
     tabActive.value = 'overview'
   }
   loadDeviceInfo()
+  await refreshData()
 })
 
 </script>

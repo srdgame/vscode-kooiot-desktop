@@ -9,6 +9,14 @@
           <AppList :show-new="false" @on-create="onCreateApp()" />
         </div>
       </el-tab-pane>
+      <el-tab-pane lazy name="tplList">
+        <template #label>
+          <span><el-icon><Files /></el-icon> {{ t('iot.store.templateList') }} </span>
+        </template>
+        <div>
+          <TemplateList />
+        </div>
+      </el-tab-pane>
       <el-tab-pane lazy name="extList">
         <template #label>
           <span><el-icon><Cpu /></el-icon> {{ t('iot.store.coreExt') }} </span>
@@ -23,7 +31,7 @@
 
 <script>
 export default {
-  name: 'StoreManufacturer',
+  name: 'StoreCached',
 }
 </script>
 
@@ -31,6 +39,7 @@ export default {
 
 import AppList from './cachedApps.vue'
 import ExtList from './cachedExts.vue'
+import TemplateList from './cachedTemplates.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 

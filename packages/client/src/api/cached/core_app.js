@@ -17,6 +17,22 @@ export const create_app = (data) => {
 }
 
 // @Tags StoreCoreApp
+// @Summary 升级StoreCoreApp
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.StoreCoreApp true "升级StoreCoreApp"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"升级成功"}"
+// @Router /cached/core_app/upgrade [delete]
+export const upgrade_app = (data) => {
+  return service({
+    url: '/cached/core_app/upgrade',
+    method: 'post',
+    data
+  })
+}
+
+// @Tags StoreCoreApp
 // @Summary 删除StoreCoreApp
 // @Security ApiKeyAuth
 // @accept application/json

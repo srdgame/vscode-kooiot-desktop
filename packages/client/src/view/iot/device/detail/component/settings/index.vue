@@ -463,10 +463,10 @@ const enterDialog = async() => {
 const checkUpdate = async() => {
   const res = await check_update({ device: props.device.sn })
   if (res.code === 0) {
-    if (res.data?.data) {
+    if (res.data) {
       latest.value = {
-        version: res.data.data.version,
-        skynet_version: res.data.data.skynet_version
+        version: res.data.version,
+        skynet_version: res.data.skynet_version
       }
       ElMessage({
         type: 'success',

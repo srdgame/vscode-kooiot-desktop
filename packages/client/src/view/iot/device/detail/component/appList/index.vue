@@ -12,7 +12,7 @@
         <el-button v-else link style="color: #dc143c" icon="circle-close"> {{ t('iot.dataChannelClosed') }} </el-button>
       </el-form-item>
       <el-form-item :style="{display:'inline-block',float:'right'}">
-        <el-button type="primary" icon="refresh-right" @click="getTableData()">{{ t('iot.refreshAppList') }}</el-button>
+        <el-button type="primary" icon="refresh-right" @click="refreshApps()">{{ t('iot.refreshAppList') }}</el-button>
         <el-button type="primary" icon="plus" @click="installApp">{{ t('iot.installApp') }}</el-button>
       </el-form-item>
       <el-form-item :style="{display:'inline-block',float:'right'}">
@@ -174,6 +174,7 @@ export default {
 import { formatTimeToStr } from '@/utils/date'
 import {
   list_app,
+  refresh_app,
   uninstall_app,
   upgrade_app,
   start_app,
@@ -276,6 +277,20 @@ const tableRowClassName = ({ row, rowIndex }) => {
     return 'success-row'
   }
   return ''
+}
+
+const refreshApps = async() => {
+  const data = {
+    device: props.device.sn,
+  }
+  const res = await refresh_app(data)
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '刷新成功!',
+      showClose: true
+    })
+  }
 }
 
 const openApp = (row) => {

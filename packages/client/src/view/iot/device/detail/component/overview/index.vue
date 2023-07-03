@@ -12,6 +12,8 @@
 
             <el-button v-if="connected" size="small" link style="color: #67C23A" icon="sort"> {{ t('iot.dataChannelOpen') }} </el-button>
             <el-button v-else size="small" link style="color: #dc143c" icon="warning-filled"> {{ t('iot.dataChannelClosed') }} </el-button>
+
+            <el-button size="small" link type="primary" icon="refresh" @click="refreshData()"> {{ t('iot.deviceDataRefresh') }} </el-button>
           </span>
         </el-row>
       </el-card>
@@ -194,6 +196,9 @@ export default {
 </script>
 
 <script setup>
+import {
+  fire_snapshot
+} from '@/api/local/device/data'
 import { check_update, sys_upgrade } from '@/api/local/device/sys'
 import { useDeviceStore } from '@/pinia/modules/device'
 import { useActionsStore } from '@/pinia/modules/actions'
@@ -332,10 +337,10 @@ const enterDialog = async() => {
 const checkUpdate = async() => {
   const res = await check_update({ device: props.device.sn, platform: deviceStatus.value.platform })
   if (res.code === 0) {
-    if (res.data?.data) {
+    if (res.data) {
       latest.value = {
-        version: res.data.data.version,
-        skynet_version: res.data.data.skynet_version
+        version: res.data.version,
+        skynet_version: res.data.skynet_version
       }
       ElMessage({
         type: 'success',
@@ -358,6 +363,12 @@ const upgradeDevice = async() => {
     formData.value.with_skynet = false
   }
   dialogFormVisible.value = true
+}
+
+const refreshData = async() => {
+  const res = await fire_snapshot({
+    device: props.device.sn,
+  })
 }
 
 </script>

@@ -42,6 +42,7 @@ export default {
 <script setup>
 import {
   delete_app,
+  upgrade_app,
   get_app_list
 } from '@/api/cached/core_app'
 import {
@@ -144,6 +145,26 @@ const removeApp = (index, row) => {
         ElMessage({
           type: 'success',
           message: t('general.deleteSuccess')
+        })
+        getTableData()
+      }
+    })
+}
+
+const updateAppVersion = async(index, row) => {
+  const latest_version = await loadVersion(row.ID)
+
+  ElMessageBox.confirm('确定升级应用到版本 ' + latest_version + '?', t('general.hint'), {
+    confirmButtonText: t('general.confirm'),
+    cancelButtonText: t('general.cancel'),
+    type: 'warning'
+  })
+    .then(async() => {
+      const res = await upgrade_app({ ID: row.ID, version: latest_version })
+      if (res.code === 0) {
+        ElMessage({
+          type: 'success',
+          message: t('general.updateSuccess')
         })
         getTableData()
       }

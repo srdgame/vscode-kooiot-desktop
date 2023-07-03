@@ -10,6 +10,7 @@ import { Database } from './database';
 import coreApp from './cached/core_app';
 import userApp from './cached/user_app';
 import template from './cached/template';
+import cachedPkg from './cached/pkg';
 import localApp from './local/user_app';
 import localDevice from './local/device';
 import localDeviceApp from './local/device/app';
@@ -55,6 +56,7 @@ app.use(localDevice.prefix(prefix).routes());
 app.use(localDeviceApp.prefix(prefix).routes());
 app.use(localDeviceData.prefix(prefix).routes());
 app.use(localDeviceSys.prefix(prefix).routes());
+app.use(cachedPkg.routes()); // TOP /pkg router
 
 const router = new Router();
 router.all('/local_api', (ctx, next) => {
@@ -74,6 +76,9 @@ app.use(publicFiles);
   // Create work dir
 Options.init(srcDir, port, workDir, cloudHost).then(()=>{
   MQTTBroker.init(6883, 16883);
+  // TODO:
+  const cachedFiles = Static('./cached');
+  app.use(Mount('/cached', cachedFiles));
 
   app.listen(port, bindHost, async () => {
     Database.init(Options.instance.dbFolder);

@@ -4,7 +4,7 @@ import * as path from 'path';
 import MakeDir from 'make-dir';
 import Router from 'koa-router';
 import { Database } from '../database';
-import { downloadFile } from '../download';
+import { downloadFile, downloadFileHash } from '../download';
 import { Options } from '../options';
 
 const router = new Router();
@@ -13,8 +13,28 @@ interface CoreApp {
     description?: any;
 }
 
+async function _downloadAppHash(app: any) {
+    const url = Options.instance.cloudHost + "/pkg/download_hash";
+    const params = {
+        device: 'KOOIOT_DESKTOP_LOCAL_CACHE',
+        token: 'KOOIOT_DESKTOP_LOCAL_CACHE',
+        app: app.app_id,
+        version: app.cache_version,
+        is_core: true,
+        platform: app.system?.name + "/" + app.system?.version + "/" + app.hardware?.name,
+        hash: 'md5',
+    };
+    downloadFileHash(url, params).then((res: any) => {
+        console.log(`File download hash response ${res}`);
+        Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { md5_hash: res?.data?.hash } }, {});
+    }).catch((reason) => {
+        console.log(`File download failed ${reason}`);
+        Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { md5_hash: 'ERROR' } }, {});
+    });
+}
+
 async function _downloadApp(app: any) {
-    const cachedFolder = path.join(Options.instance.cachedFolder, 'user_app');
+    const cachedFolder = path.join(Options.instance.cachedFolder, 'core_app');
     await MakeDir(cachedFolder);
     const params = {
         device: 'KOOIOT_DESKTOP_LOCAL_CACHE',
@@ -30,7 +50,7 @@ async function _downloadApp(app: any) {
         Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { progress: progress } }, {});
     }).then((filePath) => {
         console.log(`File download completed to ${filePath}`);
-        Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { progress: 100, cache_path: loadPath } }, {});
+        Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { progress: 100, platform: params.platform } }, {});
     }).catch((reason) => {
         console.log(`File download failed ${reason}`);
         Database.instance.dbCachedExts.updateAsync({ ID: app.ID }, { $set: { progress: -1 } }, {});
@@ -90,7 +110,28 @@ router.post('/cached/core_app/create', async (ctx) => {
         };
     }
 });
+router.post('/cached/core_app/upgrade', async (ctx) => {
+    ctx.type = 'application/json';
 
+    const apps = await Database.instance.dbCachedExts.findAsync({ ID: ctx.request.body?.ID });
+    if (apps?.length > 0) {
+        let app = apps[0];
+        app.cache_version = ctx.request.body?.version;
+        Database.instance.dbCachedExts.updateAsync({ ID: app.ID },  { $set: { progress: 0, cache_version: app.cache_version } }, {});
+        downloadApp(app);
+        ctx.body = {
+            code: 0,
+            msg: 'App upgrade is running',
+        };
+        return;
+    }
+    if (ctx.body === undefined || ctx.body.code === undefined) {
+        ctx.body = {
+            code: 400,
+            msg: 'App upgrade Failed',
+        };
+    }
+});
 router.post('/cached/core_app/delete', async (ctx) => {
     const item = {
         ID: ctx.request.body?.ID
@@ -157,8 +198,9 @@ router.put('/cached/core_app/update', async (ctx) => {
     }
 });
 router.get('/cached/core_app/get', async (ctx) => {
+    const id : any = ctx.request.query.ID;
     const item = {
-        ID: ctx.request.query?.ID
+        ID: parseInt(id)
     };
     ctx.type = 'application/json';
     try{
